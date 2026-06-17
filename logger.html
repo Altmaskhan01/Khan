@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attractive JavaScript Logging Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-error:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-clear {
+            background: #95a5a6;
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-clear:hover {
+            background: #7f8c8d;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+        }
+
+        .input-group button:hover {
+            background: #5568d3;
+        }
+
+        .logger-section {
+            grid-column: 1 / -1;
+        }
+
+        .logger-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .logger-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .logger-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-time {
+            color: #858585;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .log-level {
+            min-width: 70px;
+            flex-shrink: 0;
+            font-weight: bold;
+            border-radius: 3px;
+            padding: 2px 6px;
+            text-align: center;
+        }
+
+        .log-message {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .level-info {
+            background: #264f78;
+            color: #4fc3f7;
+        }
+
+        .level-success {
+            background: #2d5016;
+            color: #81c784;
+        }
+
+        .level-warning {
+            background: #663c00;
+            color: #ffb74d;
+        }
+
+        .level-error {
+            background: #5f2c2c;
+            color: #ef5350;
+        }
+
+        .level-debug {
+            background: #3d3d3d;
+            color: #b0bec5;
+        }
+
+        .logger-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .logger-box::-webkit-scrollbar-track {
+            background: #2e2e2e;
+            border-radius: 4px;
+        }
+
+        .logger-box::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .logger-box::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .logger-section {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .logger-box {
+                height: 400px;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="section controls-section">
+            <h2>🎮 Logger Controls</h2>
+            
+            <div class="button-group">
+                <button class="btn-info" onclick="logger.info('ℹ️ Info message example')">📝 Log Info</button>
+                <button class="btn-success" onclick="logger.success('✅ Success message example')">✅ Log Success</button>
+                <button class="btn-warning" onclick="logger.warning('⚠️ Warning message example')">⚠️ Log Warning</button>
+                <button class="btn-error" onclick="logger.error('❌ Error message example')">❌ Log Error</button>
+                <button class="btn-info" onclick="logger.debug('🐛 Debug message example')">🐛 Log Debug</button>
+                <button class="btn-warning" onclick="logger.table()">📊 Log Table</button>
+                <button class="btn-error" onclick="logger.json()">📄 Log JSON</button>
+                <button class="btn-success" onclick="logger.performance()">⚡ Performance</button>
+                <button class="btn-clear" onclick="logger.clear()">🗑️ Clear All Logs</button>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="customMessage" placeholder="Enter custom message...">
+                <button onclick="logger.custom(document.getElementById('customMessage').value)">Send</button>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">⚙️ Options</h3>
+            <label style="display: flex; gap: 10px; margin-bottom: 10px; cursor: pointer;">
+                <input type="checkbox" id="timestamps" checked onchange="logger.toggleTimestamps()">
+                <span>Show Timestamps</span>
+            </label>
+            <label style="display: flex; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="autoScroll" checked onchange="logger.toggleAutoScroll()">
+                <span>Auto Scroll</span>
+            </label>
+        </div>
+
+        <div class="section">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📈 Statistics</h2>
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalLogs">0</div>
+                    <div class="stat-label">Total Logs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="infoCount">0</div>
+                    <div class="stat-label">Info</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successCount">0</div>
+                    <div class="stat-label">Success</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="warningCount">0</div>
+                    <div class="stat-label">Warning</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="errorCount">0</div>
+                    <div class="stat-label">Error</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section logger-section">
+        <h2>📺 Logger Console</h2>
+        <div class="logger-header">
+            <button class="filter-btn active" onclick="logger.filter('all')">All</button>
+            <button class="filter-btn" onclick="logger.filter('info')">Info</button>
+            <button class="filter-btn" onclick="logger.filter('success')">Success</button>
+            <button class="filter-btn" onclick="logger.filter('warning')">Warning</button>
+            <button class="filter-btn" onclick="logger.filter('error')">Error</button>
+            <button class="filter-btn" onclick="logger.filter('debug')">Debug</button>
+        </div>
+        <div class="logger-box" id="loggerBox"></div>
+    </div>
+
+    <script>
+        class AttractiveLogger {
+            constructor() {
+                this.logs = [];
+                this.currentFilter = 'all';
+                this.showTimestamps = true;
+                this.autoScroll = true;
+                this.stats = {
+                    total: 0,
+                    info: 0,
+                    success: 0,
+                    warning: 0,
+                    error: 0,
+                    debug: 0
+                };
+            }
+
+            log(message, level) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = {
+                    message,
+                    level,
+                    timestamp,
+                    id: this.logs.length
+                };
+
+                this.logs.push(logEntry);
+                this.stats.total++;
+                this.stats[level]++;
+
+                this.updateStats();
+                this.render();
+                this.logToConsole(message, level);
+            }
+
+            info(message) {
+                this.log(message, 'info');
+            }
+
+            success(message) {
+                this.log(message, 'success');
+            }
+
+            warning(message) {
+                this.log(message, 'warning');
+            }
+
+            error(message) {
+                this.log(message, 'error');
+            }
+
+            debug(message) {
+                this.log(message, 'debug');
+            }
+
+            custom(message) {
+                if (message.trim()) {
+                    this.log(message, 'info');
+                    document.getElementById('customMessage').value = '';
+                }
+            }
+
+            table() {
+                const tableData = [
+                    { name: 'Item 1', value: 100, status: 'Active' },
+                    { name: 'Item 2', value: 250, status: 'Pending' },
+                    { name: 'Item 3', value: 180, status: 'Complete' }
+                ];
+                this.log('Table: ' + JSON.stringify(tableData, null, 2), 'debug');
+                console.table(tableData);
+            }
+
+            json() {
+                const data = {
+                    name: 'Logger Demo',
+                    version: '1.0.0',
+                    features: ['Logging', 'Filtering', 'Statistics'],
+                    timestamp: new Date().toISOString()
+                };
+                this.log('JSON: ' + JSON.stringify(data, null, 2), 'debug');
+            }
+
+            performance() {
+                const perfData = {
+                    'Page Load': Math.random() * 1000 + 'ms',
+                    'DOM Ready': Math.random() * 500 + 'ms',
+                    'Memory Usage': Math.random() * 50 + 'MB'
+                };
+                this.log('Performance: ' + JSON.stringify(perfData, null, 2), 'info');
+            }
+
+            filter(level) {
+                this.currentFilter = level;
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                this.render();
+            }
+
+            toggleTimestamps() {
+                this.showTimestamps = document.getElementById('timestamps').checked;
+                this.render();
+            }
+
+            toggleAutoScroll() {
+                this.autoScroll = document.getElementById('autoScroll').checked;
+            }
+
+            clear() {
+                if (confirm('🗑️ Are you sure you want to clear all logs?')) {
+                    this.logs = [];
+                    this.stats = { total: 0, info: 0, success: 0, warning: 0, error: 0, debug: 0 };
+                    this.updateStats();
+                    this.render();
+                }
+            }
+
+            render() {
+                const loggerBox = document.getElementById('loggerBox');
+                loggerBox.innerHTML = '';
+
+                const filteredLogs = this.currentFilter === 'all' 
+                    ? this.logs 
+                    : this.logs.filter(log => log.level === this.currentFilter);
+
+                filteredLogs.forEach(log => {
+                    const entry = document.createElement('div');
+                    entry.className = `log-entry`;
+                    
+                    let html = '';
+                    if (this.showTimestamps) {
+                        html += `<span class="log-time">[${log.timestamp}]</span>`;
+                    }
+                    html += `<span class="log-level level-${log.level}">${log.level.toUpperCase()}</span>`;
+                    html += `<span class="log-message">${this.escapeHtml(log.message)}</span>`;
+                    
+                    entry.innerHTML = html;
+                    loggerBox.appendChild(entry);
+                });
+
+                if (this.autoScroll) {
+                    loggerBox.scrollTop = loggerBox.scrollHeight;
+                }
+            }
+
+            updateStats() {
+                document.getElementById('totalLogs').textContent = this.stats.total;
+                document.getElementById('infoCount').textContent = this.stats.info;
+                document.getElementById('successCount').textContent = this.stats.success;
+                document.getElementById('warningCount').textContent = this.stats.warning;
+                document.getElementById('errorCount').textContent = this.stats.error;
+            }
+
+            logToConsole(message, level) {
+                const styles = {
+                    info: 'color: #4fc3f7; font-weight: bold;',
+                    success: 'color: #81c784; font-weight: bold;',
+                    warning: 'color: #ffb74d; font-weight: bold;',
+                    error: 'color: #ef5350; font-weight: bold;',
+                    debug: 'color: #b0bec5; font-weight: bold;'
+                };
+                console.log(`%c[${level.toUpperCase()}] ${message}`, styles[level]);
+            }
+
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+        }
+
+        // Initialize the logger
+        const logger = new AttractiveLogger();
+
+        // Welcome messages
+        window.addEventListener('load', () => {
+            logger.info('🎮 Attractive JavaScript Logger initialized!');
+            logger.success('✅ All systems ready');
+            logger.debug('🐛 Debug mode enabled');
+        });
+
+        // Log page interactions
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                logger.debug(`Button clicked: ${e.target.textContent.trim()}`);
+            }
+        });
+    </script>
+</body>
+</html>
